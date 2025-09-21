@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Veterinaria.Domain\Veterinaria.Domain.csproj" />
+    <ProjectReference Include="..\Veterinarian.Infrastructure\Veterinarian.Infrastructure.csproj" />
+    <ProjectReference Include="..\Veterinarian.Security\Veterinarian.Security.csproj" />
+  </ItemGroup>
+
+</Project>
