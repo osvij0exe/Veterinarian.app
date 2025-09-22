@@ -21,39 +21,12 @@ namespace Veterinarian.Application.Vets
             _vetsUnitOfWork = vetsUnitOfWork;
         }
 
-        public async Task<Result> CreateAndRegisterAsync(VetRequest request)
+        public async Task<Result> CreateAndRegisterAsync(VetRequest request, IdentityUser identityUser)
         {
             //transacción entre tablas dentro de la misma base de datos
             using IDbContextTransaction transaction = await _vetsUnitOfWork._applicationIdentityDbContext.Database.BeginTransactionAsync();
             _vetsUnitOfWork._applicationDbContext.Database.SetDbConnection(_vetsUnitOfWork._applicationIdentityDbContext.Database.GetDbConnection());
             await _vetsUnitOfWork._applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
-
-
-
-            var identityUser = new IdentityUser
-            {
-                Email = request.Email,
-                UserName = request.Email
-            };
-
-            IdentityResult identityResult = await _vetsUnitOfWork.IdentityRepository.Register(identityUser,request.Password);
-
-            if (!identityResult.Succeeded)
-            {
-
-                return Result.Failure(new Error("Unable to register user", "please try again"));
-            }
-
-            IdentityResult addToRoleResult = await _vetsUnitOfWork.IdentityRepository.AddToRoleAsync(identityUser, Role.VetMember);
-
-
-            if (!addToRoleResult.Succeeded)
-            {
-
-                return Result.Failure(new Error("Unable to register user", "please try again"));
-            }
-
-
 
             //Aplication User ApplicationDbContext
             User user = new User

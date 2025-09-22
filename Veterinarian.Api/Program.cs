@@ -17,6 +17,7 @@ using Veterinaria.Domain.Entities.Users;
 using Veterinaria.Domain.Entities.Vets;
 using Veterinarian.Api.ExtensionsFiled;
 using Veterinarian.Application;
+using Veterinarian.Application.AuthServices;
 using Veterinarian.Application.Invoices;
 using Veterinarian.Application.MedicalConsultations;
 using Veterinarian.Application.Owners;
@@ -97,7 +98,8 @@ builder.Services.AddScoped<IPetServices, PetServices>();
 builder.Services.AddScoped<ISpecialitiesServices, SpecialitiesServices>();
 builder.Services.AddScoped<IVetServices, VetServices>();
 
-builder.Services.AddScoped<IIdentityUserServices, IdentityUserServices>();
+builder.Services.AddScoped<IApplicationUserServices, ApplicationUserServices>();
+builder.Services.AddScoped<IUserManagerServices, UserManagerServices>();
 
 builder.Services.AddScoped<IInvoicesRepository, InvoicesRepository>();
 builder.Services.AddScoped<IMedicalConsultationRepository, MedicalConsultationRepository>();
@@ -107,7 +109,7 @@ builder.Services.AddScoped<IPetsRepository, PetsRepository>();
 builder.Services.AddScoped<ISpecialityRepository, SpecialitiesRepository>();
 builder.Services.AddScoped<IVetsRepository, VetRepository>();
 
-builder.Services.AddScoped<IIdentityRepository, IdentityRepository>();
+builder.Services.AddScoped<IApplicationUserRepository, ApplcationUserRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<InvoiceUnitOfWork>();

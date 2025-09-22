@@ -1,7 +1,11 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Veterinaria.Domain.Entities.Users;
+using Veterinarian.Application.AuthServices;
 using Veterinarian.Application.Owners;
+using Veterinarian.Application.Users;
 
 namespace Veterinarian.Api.Controllers
 {
@@ -10,10 +14,16 @@ namespace Veterinarian.Api.Controllers
     public class OwnersController : ControllerBase
     {
         private readonly IOwnerServices _ownerServices;
+        private readonly IUserManagerServices _userManagerServices;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public OwnersController(IOwnerServices ownerServices)
+        public OwnersController(IOwnerServices ownerServices,
+            IUserManagerServices userManagerServices,
+            RoleManager<IdentityRole> roleManager)
         {
             _ownerServices = ownerServices;
+            _userManagerServices = userManagerServices;
+            _roleManager = roleManager;
         }
 
         [HttpGet("GetAllOwners")]
@@ -31,7 +41,7 @@ namespace Veterinarian.Api.Controllers
         }
 
         [HttpGet("SearchOwner")]
-        public async Task<IActionResult> SearchOwner(string? search,int page, int pageSize)
+        public async Task<IActionResult> SearchOwner(string? search,int page = 1, int pageSize = 5)
         {
             var response = await _ownerServices.SearchOnwers(search,page,pageSize);
 
@@ -49,8 +59,60 @@ namespace Veterinarian.Api.Controllers
                 return BadRequest(validationResult.ToDictionary());
             }
 
+            //identity User identityDbContext
+            var identityUser = new IdentityUser
+            {
+                Email = request.Email,
+                UserName = request.Email
+            };
 
-            var result = await _ownerServices.CreateAndRegisterAsync(request);
+            IdentityResult identityResult = await _userManagerServices.IdentityUserRegister(identityUser, request.Password);
+
+            if (!identityResult.Succeeded)
+            {
+                var extensions = new Dictionary<string, object?>
+                {
+                    {
+                        "error",
+                        identityResult.Errors.ToDictionary(e => e.Code,e => e.Description)
+                    }
+                };
+                return Problem(
+                    detail: "Unable to register user, please try again",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    extensions: extensions);
+            }
+
+            var existRole = await _roleManager.RoleExistsAsync(Role.Owner);
+            if (!existRole)
+            {
+                _userManagerServices.RemoveIdentityUserAsinc(identityUser);
+                return Problem(
+                    detail: "Unable to register user, The role provided does not exist",
+                    statusCode: StatusCodes.Status400BadRequest);
+            }
+
+            var addtoRole = await _userManagerServices.AddToRoleAsync(identityUser, Role.Owner);
+
+            if (!addtoRole.Succeeded)
+            {
+                var extensions = new Dictionary<string, object?>
+                {
+                    {
+                        "error",
+                        identityResult.Errors.ToDictionary(e => e.Code,e => e.Description)
+                    }
+                };
+                return Problem(
+                    detail: "Unable to register user, please try again",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    extensions: extensions);
+
+            }
+
+
+
+            var result = await _ownerServices.CreateAndRegisterAsync(request, identityUser);
             return result.IsSuccess ?NoContent() : BadRequest(result.Error);
         }
 

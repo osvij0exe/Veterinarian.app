@@ -14,12 +14,12 @@ using Veterinarian.Security.Token;
 
 namespace Veterinarian.Infrastructure.Repositories
 {
-    public class IdentityRepository : IIdentityRepository
+    public class ApplcationUserRepository : IApplicationUserRepository
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly ApplicationIdentityDbContext _identityContext;
 
-        public IdentityRepository(UserManager<IdentityUser> userManager,
+        public ApplcationUserRepository(UserManager<IdentityUser> userManager,
             ApplicationIdentityDbContext identityContext)
         {
             _userManager = userManager;
@@ -46,25 +46,6 @@ namespace Veterinarian.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<IdentityResult> AddToRoleAsync(IdentityUser identityUser, string role)
-        {
-
-            var availableRoles = new List<string>()
-            {
-                new(Role.VetMember),
-                new(Role.AuxiliaryMember),
-                new(Role.Owner),
-            };
-
-            if (!availableRoles.Any(userRole => userRole.Equals(role)))
-            {
-                return null!;
-            }
-           
-            IdentityResult roleAdded = await _userManager.AddToRoleAsync(identityUser,role);
-
-            return roleAdded;
-        }
 
         public async Task<IdentityUser> Login(string email, string passowrd)
         {
@@ -81,15 +62,6 @@ namespace Veterinarian.Infrastructure.Repositories
                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken);
 
             return refresToken!;
-
-        }
-
-        public async Task<IdentityResult> Register(IdentityUser user, string password)
-        {
-            
-            IdentityResult identityResult = await _userManager.CreateAsync(user:user,password: password);
-
-            return identityResult;
 
         }
 

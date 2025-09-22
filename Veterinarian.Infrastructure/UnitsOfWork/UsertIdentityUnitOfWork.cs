@@ -20,7 +20,7 @@ namespace Veterinarian.Infrastructure.UnitsOfWork
         public UsertIdentityUnitOfWork(
             ApplicationDbContext dbContext, 
             ApplicationIdentityDbContext identityDbContext,
-            IIdentityRepository identityRepository,
+            IApplicationUserRepository identityRepository,
             IUserRepository userRepository,
             IOptions<JwtAuthOptions> options) 
             : base(dbContext)
@@ -38,6 +38,6 @@ namespace Veterinarian.Infrastructure.UnitsOfWork
         public readonly ApplicationDbContext ApplicationDbContext;
         public IOptions<JwtAuthOptions> _jwtAuthOptions { get; }
         public IUserRepository UserRepository { get; }
-        public IIdentityRepository IdentityRepository { get; }
+        public IApplicationUserRepository IdentityRepository { get; }
     }
 }

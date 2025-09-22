@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace Veterinarian.Application.Owners
 {
     public interface IOwnerServices
     {
-        Task<Result> CreateAndRegisterAsync(OwnerRequest request);
+        Task<Result> CreateAndRegisterAsync(OwnerRequest request,IdentityUser identityUser);
         Task<Result> DeleteAsync(Guid id);
         Task<Result<List<OwnerResponse>>> GetAllAsync();
         Task<Result<OwnerResponse>> GetByIdAsync(Guid id);

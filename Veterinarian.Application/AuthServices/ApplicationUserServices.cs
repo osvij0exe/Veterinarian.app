@@ -16,13 +16,13 @@ using Veterinarian.Security.Token;
 
 namespace Veterinarian.Application.Users
 {
-    public class IdentityUserServices : IIdentityUserServices
+    public class ApplicationUserServices : IApplicationUserServices
     {
         private readonly UsertIdentityUnitOfWork _identityUnitOfWork;
         private readonly TokenProvider _tokenProvider;
         private readonly UserManager<IdentityUser> _userManager;
 
-        public IdentityUserServices(UsertIdentityUnitOfWork identityUnitOfWork,
+        public ApplicationUserServices(UsertIdentityUnitOfWork identityUnitOfWork,
             TokenProvider tokenProvider,
             UserManager<IdentityUser> userManager,
             IOptions<JwtAuthOptions> options)
@@ -96,38 +96,12 @@ namespace Veterinarian.Application.Users
 
         }
 
-        public async Task<Result<AccessTokenDto>> Register(RegisterUserDto registerUser)
+        public async Task<Result<AccessTokenDto>> Register(RegisterUserDto registerUser, IdentityUser identityUser)
         {
             //transacción entre tablas dentro de la misma base de datos
             using IDbContextTransaction transaction = await _identityUnitOfWork.IdentityDbContext.Database.BeginTransactionAsync();
             _identityUnitOfWork.ApplicationDbContext.Database.SetDbConnection(_identityUnitOfWork.IdentityDbContext.Database.GetDbConnection());
             await _identityUnitOfWork.ApplicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
-
-
-            //identity User identityDbContext
-            var identityUser = new IdentityUser
-            {
-                Email = registerUser.Email,
-                UserName = registerUser.Email
-            };
-
-            IdentityResult identityResult = await _identityUnitOfWork.IdentityRepository.Register(identityUser, registerUser.Password);
-
-            if (!identityResult.Succeeded)
-            {
-                //mover al controladro para ver los errores al registrar el usario como errores de passwor etc
-                return Result.Failure<AccessTokenDto>(new Error("Unable to register user", "please try again"));
-            }
-
-            IdentityResult addToRoleResult = await _identityUnitOfWork.IdentityRepository.AddToRoleAsync(identityUser, Role.AuxiliaryMember);
-
-
-            if (!addToRoleResult.Succeeded)
-            {
-
-                return Result.Failure<AccessTokenDto>(new Error("Unable to register user", "please try again"));
-            }
-
 
 
             //Aplication User ApplicationDbContext
@@ -137,7 +111,7 @@ namespace Veterinarian.Application.Users
             await _identityUnitOfWork.UserRepository.AddAsync(user);
             await _identityUnitOfWork.ApplicationDbContext.SaveChangesAsync();
 
-            var tokenRequest = new TokenRequest(identityUser.Id, identityUser.Email,[Role.AuxiliaryMember]);
+            var tokenRequest = new TokenRequest(identityUser.Id, identityUser.Email!,[Role.AuxiliaryMember]);
             AccessTokenDto accessToken = _tokenProvider.Create(tokenRequest);
 
             var refresh = new RefreshToken

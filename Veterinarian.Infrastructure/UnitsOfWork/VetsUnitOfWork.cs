@@ -22,7 +22,7 @@ namespace Veterinarian.Application.UnitsOfWork
             IVetsRepository vetsRepository,
             ISpecialityRepository specialityRepository,
             IUserContext userContext,
-            IIdentityRepository identityRepository,
+            IApplicationUserRepository identityRepository,
             IUserRepository userRepository) 
             : base(dbContext)
         {
@@ -39,7 +39,7 @@ namespace Veterinarian.Application.UnitsOfWork
 
         public IUserRepository UserRepository;
         public IUserContext UserContext;
-        public IIdentityRepository IdentityRepository;
+        public IApplicationUserRepository IdentityRepository;
         public IVetsRepository VetsRepository { get; }
         public ISpecialityRepository SpecialityRepository { get; }
     }

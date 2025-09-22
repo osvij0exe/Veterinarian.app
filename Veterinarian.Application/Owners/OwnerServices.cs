@@ -25,32 +25,13 @@ namespace Veterinarian.Application.Owners
         {
             _ownerUnitOfWork = ownerUnitOfWork;
         }
-        public async Task<Result> CreateAndRegisterAsync(OwnerRequest request)
+        public async Task<Result> CreateAndRegisterAsync(OwnerRequest request,IdentityUser identityUser)
         {
             //transaction between tables
             using IDbContextTransaction transaction = await _ownerUnitOfWork._identityDbContext.Database.BeginTransactionAsync();
             _ownerUnitOfWork._applicationDbContext.Database.SetDbConnection(_ownerUnitOfWork._identityDbContext.Database.GetDbConnection());
             await _ownerUnitOfWork._applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
             
-            var identityUser = new IdentityUser
-            {
-                Email = request.Email,
-                UserName = request.Email
-            };
-
-            IdentityResult identityResult = await _ownerUnitOfWork.IdentityRepository.Register(identityUser, request.Password);
-
-            if(!identityResult.Succeeded)
-            {
-                return Result.Failure(new Error("Unable to register user", "please try again"));
-            }
-
-            IdentityResult addToRole = await _ownerUnitOfWork.IdentityRepository.AddToRoleAsync(identityUser, Role.Owner);
-            if(!addToRole.Succeeded)
-            {
-                return Result.Failure(new Error("Unable to register user", "please try again"));
-            }
-
             //Create Aplication user
             User user = new User
             {

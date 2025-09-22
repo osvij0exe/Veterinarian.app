@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace Veterinarian.Application.Vets
 {
     public interface IVetServices
     {
-        Task<Result> CreateAndRegisterAsync(VetRequest request);
+        Task<Result> CreateAndRegisterAsync(VetRequest request,IdentityUser identityUser);
         Task<Result> DeleteAsync(Guid id);
         Task<Result<VetResponse>> GetByIdAsync(Guid id);
         Task<Result<List<VetResponse>>> GetAllAsync();

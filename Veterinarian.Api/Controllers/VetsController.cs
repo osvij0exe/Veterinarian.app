@@ -1,6 +1,10 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Veterinaria.Domain.Entities.Users;
+using Veterinarian.Application.AuthServices;
+using Veterinarian.Application.Users;
 using Veterinarian.Application.Vets;
 
 namespace Veterinarian.Api.Controllers
@@ -10,10 +14,16 @@ namespace Veterinarian.Api.Controllers
     public class VetsController : ControllerBase
     {
         private readonly IVetServices _vetServices;
+        private readonly IUserManagerServices _userManagerServices;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public VetsController(IVetServices vetServices)
+        public VetsController(IVetServices vetServices,
+            IUserManagerServices userManagerServices,
+            RoleManager<IdentityRole> roleManager)
         {
             _vetServices = vetServices;
+            _userManagerServices = userManagerServices;
+            _roleManager = roleManager;
         }
 
         [HttpGet("GetVets")]
@@ -47,7 +57,60 @@ namespace Veterinarian.Api.Controllers
                 return BadRequest(validationResult.ToDictionary());
             }
 
-            var response = await _vetServices.CreateAndRegisterAsync(request);
+            //identity User identityDbContext
+            var identityUser = new IdentityUser
+            {
+                Email = request.Email,
+                UserName = request.Email
+            };
+
+            IdentityResult identityResult = await _userManagerServices.IdentityUserRegister(identityUser, request.Password);
+
+            if (!identityResult.Succeeded)
+            {
+                var extensions = new Dictionary<string, object?>
+                {
+                    {
+                        "error",
+                        identityResult.Errors.ToDictionary(e => e.Code,e => e.Description)
+                    }
+                };
+                return Problem(
+                    detail: "Unable to register user, please try again",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    extensions: extensions);
+            }
+
+            var existRole = await _roleManager.RoleExistsAsync(Role.VetMember);
+            if (!existRole)
+            {
+                _userManagerServices.RemoveIdentityUserAsinc(identityUser);
+                return Problem(
+                    detail: "Unable to register user, The role provided does not exist",
+                    statusCode: StatusCodes.Status400BadRequest);
+            }
+
+            var addtoRole = await _userManagerServices.AddToRoleAsync(identityUser, Role.VetMember);
+
+            if (!addtoRole.Succeeded)
+            {
+                var extensions = new Dictionary<string, object?>
+                {
+                    {
+                        "error",
+                        identityResult.Errors.ToDictionary(e => e.Code,e => e.Description)
+                    }
+                };
+                return Problem(
+                    detail: "Unable to register user, please try again",
+                    statusCode: StatusCodes.Status400BadRequest,
+                    extensions: extensions);
+
+            }
+
+
+
+            var response = await _vetServices.CreateAndRegisterAsync(request,identityUser);
             return response.IsSuccess ? Ok(response) : BadRequest(response.Error);
         }
         [HttpDelete("{id}")]
