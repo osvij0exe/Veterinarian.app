@@ -208,7 +208,7 @@ namespace Veterinarian.Application.Owners
         {
             var owner = await _ownerUnitOfWork.OwnerRepositoy.GetByIdAsync(id);
 
-            if(owner is null)
+            if(owner is null )
             {
                 return Result.Failure(OwnerError.OwnerNotFound);
             }

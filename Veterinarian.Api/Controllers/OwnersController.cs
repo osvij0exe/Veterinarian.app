@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 using Veterinaria.Domain.Entities.Users;
 using Veterinarian.Application.AuthServices;
 using Veterinarian.Application.Owners;
@@ -9,49 +11,97 @@ using Veterinarian.Application.Users;
 
 namespace Veterinarian.Api.Controllers
 {
+    [Authorize]
     [ApiController]
-    [Route("Api/Owners")]
+    [Route("api/owners")]
     public class OwnersController : ControllerBase
     {
         private readonly IOwnerServices _ownerServices;
         private readonly IUserManagerServices _userManagerServices;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IUserContext _userContext;
 
         public OwnersController(IOwnerServices ownerServices,
             IUserManagerServices userManagerServices,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            IUserContext userContext)
         {
             _ownerServices = ownerServices;
             _userManagerServices = userManagerServices;
             _roleManager = roleManager;
+            _userContext = userContext;
         }
 
-        [HttpGet("GetAllOwners")]
-        public async Task<IActionResult> GetAllOwners()
+        [Authorize(Roles =$"{Role.Admin},{Role.AuxiliaryMember},{Role.VetMember}")]
+        [HttpGet("getAllOwners")]
+        public async Task<IActionResult> GetAllOwners(CancellationToken cancellationToken)
         {
+
+            string? CurrentUserId = await _userContext.GetUserIdAsync(cancellationToken);
+
+            if (string.IsNullOrWhiteSpace(CurrentUserId))
+            {
+                return Problem(
+                    detail: "Unauthorized",
+                    statusCode: StatusCodes.Status401Unauthorized);
+            }
+
             var owners = await _ownerServices.GetAllAsync();
             return Ok(owners.Value);
         }
 
-        [HttpGet("GetOwner/{id}")]
-        public async Task<IActionResult> GetOwnerById(Guid id)
+        [Authorize(Roles =$"{Role.Admin},{Role.AuxiliaryMember},{Role.VetMember},{Role.Owner}")]
+        [HttpGet("getOwner/{id}")]
+        public async Task<IActionResult> GetOwnerById(Guid id,CancellationToken cancellationToken)
         {
+            string? CurrentUserId = await _userContext.GetUserIdAsync(cancellationToken);
+
+            if (string.IsNullOrWhiteSpace(CurrentUserId))
+            {
+                return Problem(
+                    detail: "Unauthorized",
+                    statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+
             var owner = await _ownerServices.GetByIdAsync(id);
             return owner.IsSuccess ? Ok(owner.Value) : NotFound(owner.Error);
         }
 
-        [HttpGet("SearchOwner")]
-        public async Task<IActionResult> SearchOwner(string? search,int page = 1, int pageSize = 5)
+        [Authorize(Roles =$"{Role.Admin},{Role.AuxiliaryMember},{Role.VetMember}")]
+        [HttpGet("searchOwner")]
+        public async Task<IActionResult> SearchOwner(string? search,CancellationToken cancellationToken, int page = 1, int pageSize = 5)
         {
+
+            string? CurrentUserId = await _userContext.GetUserIdAsync(cancellationToken);
+
+            if (string.IsNullOrWhiteSpace(CurrentUserId))
+            {
+                return Problem(
+                    detail: "Unauthorized",
+                    statusCode: StatusCodes.Status401Unauthorized);
+            }
+
             var response = await _ownerServices.SearchOnwers(search,page,pageSize);
 
             return Ok(response.Value);
         }
 
+        [Authorize(Roles =$"{Role.Admin},{Role.AuxiliaryMember},{Role.VetMember}")]
         [HttpPost]
         public async Task<IActionResult> CreateOwner([FromBody] OwnerRequest request,
-            IValidator<OwnerRequest> validator)
+            IValidator<OwnerRequest> validator,CancellationToken cancellationToken)
         {
+            string? CurrentUserId = await _userContext.GetUserIdAsync(cancellationToken);
+
+            if (string.IsNullOrWhiteSpace(CurrentUserId))
+            {
+                return Problem(
+                    detail: "Unauthorized",
+                    statusCode: StatusCodes.Status401Unauthorized);
+            }
+
+
             ValidationResult validationResult = await validator.ValidateAsync(request);
 
             if(!validationResult.IsValid)
@@ -116,17 +166,36 @@ namespace Veterinarian.Api.Controllers
             return result.IsSuccess ?NoContent() : BadRequest(result.Error);
         }
 
+        [Authorize(Roles =$"{Role.Admin},{Role.AuxiliaryMember},{Role.VetMember}")]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteOwner(Guid id)
+        public async Task<IActionResult> DeleteOwner(Guid id, CancellationToken cancellationToken)
         {
+            string? CurrentUserId = await _userContext.GetUserIdAsync(cancellationToken);
+
+            if (string.IsNullOrWhiteSpace(CurrentUserId))
+            {
+                return Problem(
+                    detail: "Unauthorized",
+                    statusCode: StatusCodes.Status401Unauthorized);
+            }
+
             var result = await _ownerServices.DeleteAsync(id);
             return result.IsSuccess ? NoContent() : NotFound(result.Error);
         }
 
+        [Authorize(Roles =$"{Role.Admin},{Role.AuxiliaryMember},{Role.VetMember}")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateOwner(Guid id, [FromBody] OwnerUpdateRequest request,
-            IValidator<OwnerUpdateRequest> validator)
+            IValidator<OwnerUpdateRequest> validator,CancellationToken cancellationToken)
         {
+            string? CurrentUserId = await _userContext.GetUserIdAsync(cancellationToken);
+
+            if (string.IsNullOrWhiteSpace(CurrentUserId))
+            {
+                return Problem(
+                    detail: "Unauthorized",
+                    statusCode: StatusCodes.Status401Unauthorized);
+            }
 
             ValidationResult validationResult = await validator.ValidateAsync(request);
 
