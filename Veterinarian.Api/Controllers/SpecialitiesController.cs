@@ -1,12 +1,14 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Veterinarian.Application.Specialities;
 
 namespace Veterinarian.Api.Controllers
 {
+    [AllowAnonymous]
     [ApiController]
-    [Route("Api/Specialities")]
+    [Route("api/specialities")]
     public class SpecialitiesController : ControllerBase
     {
         private readonly ISpecialitiesServices _specialitiesServices;
@@ -16,14 +18,14 @@ namespace Veterinarian.Api.Controllers
             _specialitiesServices = specialitiesServices;
         }
 
-        [HttpGet("GetAllSpecialities")]
+        [HttpGet("getAllSpecialities")]
         public async Task<IActionResult> GetAllSpecialities()
         {
             var specialities = await _specialitiesServices.GetAllAsync();
             return Ok(specialities.Value);
         }
 
-        [HttpGet("GetSpeciality/{id}")]
+        [HttpGet("getSpeciality/{id}")]
         public async Task<IActionResult> GetSpecialityById(Guid id)
         {
             var speciality = await _specialitiesServices.GetByIdAsync(id);
