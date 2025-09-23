@@ -26,6 +26,7 @@ using Veterinarian.Application.Repositories;
 using Veterinarian.Application.Specialities;
 using Veterinarian.Application.UnitsOfWork;
 using Veterinarian.Application.Users;
+using Veterinarian.Application.UserServices;
 using Veterinarian.Application.Vets;
 using Veterinarian.Infrastructure;
 using Veterinarian.Infrastructure.Configurations;
@@ -98,8 +99,10 @@ builder.Services.AddScoped<IPetServices, PetServices>();
 builder.Services.AddScoped<ISpecialitiesServices, SpecialitiesServices>();
 builder.Services.AddScoped<IVetServices, VetServices>();
 
+
 builder.Services.AddScoped<IApplicationUserServices, ApplicationUserServices>();
 builder.Services.AddScoped<IUserManagerServices, UserManagerServices>();
+builder.Services.AddScoped<IUserServices, UserServices>();  
 
 builder.Services.AddScoped<IInvoicesRepository, InvoicesRepository>();
 builder.Services.AddScoped<IMedicalConsultationRepository, MedicalConsultationRepository>();

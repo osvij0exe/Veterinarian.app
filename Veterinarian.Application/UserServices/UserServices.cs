@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,37 +13,34 @@ namespace Veterinarian.Application.UserServices
 {
     public class UserServices : IUserServices
     {
-        private readonly ApplicationDbContext _dbContext;
-        private readonly UserContext _userContext;
+        private readonly IUserContext _userContext;
         private readonly IUserRepository _userRepository;
 
-        public UserServices(ApplicationDbContext dbContext,
-            UserContext userContext,
+        public UserServices(IUserContext userContext,
             IUserRepository userRepository)
         {
-            _dbContext = dbContext;
             _userContext = userContext;
             _userRepository = userRepository;
         }
-        public async Task<Result<UserResponse>> GetUserById(string id,CancellationToken cancellationToken)
+        public async Task<Result<UserResponse>> GetUserByIdAsync(string userId,CancellationToken cancellationToken)
         {
-            var userId = await _userContext.GetUserIdAsync(cancellationToken);
-
-            if(string.IsNullOrWhiteSpace(userId))
+            string? CurrentUserId = await _userContext.GetUserIdAsync(cancellationToken);
+            
+            if (string.IsNullOrWhiteSpace(CurrentUserId))
             {
-                return Result.Failure<UserResponse>(new Error("Unauthorized.Error", "Unauthorized"));
-            };
-
-            if(id != userId)
-            {
-                return Result.Failure<UserResponse>(new Error("Forbiden.Error","Access denied"));
+                return Result.Failure<UserResponse>(new Error(StatusCodes.Status401Unauthorized.ToString(), "Unauthorized"));
             }
 
-            var user = await _userRepository.GetUserByIdAsync(id);
+            if(userId != CurrentUserId)
+            {
+                return Result.Failure<UserResponse>(new Error(StatusCodes.Status403Forbidden.ToString(),"Access denied"));
+            }
+
+            var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken );
 
             if(user is  null)
             {
-                return Result.Failure<UserResponse>(new Error("NotFound.Error", "the user was not found"));
+                return Result.Failure<UserResponse>(new Error(StatusCodes.Status404NotFound.ToString(), "the user was not found"));
             }
 
             var userMapped = new UserResponse
@@ -59,18 +57,18 @@ namespace Veterinarian.Application.UserServices
         }
         public async Task<Result<UserResponse>> GetCurrentUser(CancellationToken cancellationToken)
         {
-            var identityId = await _userContext.GetUserIdAsync(cancellationToken);
+            var userId = await _userContext.GetUserIdAsync(cancellationToken);
             
-            if(string.IsNullOrWhiteSpace(identityId))
+            if(string.IsNullOrWhiteSpace(userId))
             {
-                return Result.Failure<UserResponse>(new Error("Unauthorized.Error", "Unauthorized"));
+                return Result.Failure<UserResponse>(new Error(StatusCodes.Status401Unauthorized.ToString(), "Unauthorized"));
             }
 
-            var user = await _userRepository.GetUserByIdAsync(identityId);
+            var user = await _userRepository.GetUserByIdAsync(userId,cancellationToken);
 
             if (user is null)
             {
-                return Result.Failure<UserResponse>(new Error("NotFound.Error", "the user was not found"));
+                return Result.Failure<UserResponse>(new Error(StatusCodes.Status404NotFound.ToString(), "the user was not found"));
             }
 
             var userMapped = new UserResponse

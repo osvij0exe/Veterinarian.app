@@ -30,8 +30,9 @@ namespace Veterinarian.Infrastructure.ServicesFiles
         private const string CacheKeyPrefix = "users:id:";
         private static readonly TimeSpan CahceDuration = TimeSpan.FromMinutes(30);
 
-        public async Task<string> GetUserIdAsync(CancellationToken cancellationToken)
+        public async Task<string?> GetUserIdAsync(CancellationToken cancellationToken)
         {
+            //claim extension method we create
             string? identityId = _httpContextAccessor.HttpContext?.User.GetIdentityId();
             if(identityId is null)
             {

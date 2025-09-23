@@ -10,13 +10,10 @@ namespace Veterinarian.Application.AuthServices
     public class UserManagerServices : IUserManagerServices
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserManagerServices(UserManager<IdentityUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+        public UserManagerServices(UserManager<IdentityUser> userManager)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
         }
         public async Task<IdentityResult> AddToRoleAsync(IdentityUser identityUser, string role)
         {

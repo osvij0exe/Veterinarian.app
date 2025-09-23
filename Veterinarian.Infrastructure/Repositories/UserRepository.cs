@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Veterinaria.Domain.Entities.Users;
 using Veterinarian.Application;
@@ -27,23 +28,27 @@ namespace Veterinarian.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<User> GetUserByIdAsync(string id)
+        public async Task<User> GetUserByIdAsync(string userId, CancellationToken cancellationToken)
         {
 
             User? user = await _applicationDbContext.Set<User>()
-                .Where(u => u.Id == id)
+                .Where(u => u.Id == userId)
                 .Select(u => new User
                 {
                     Id = u.Id,
                     Name = u.Name,
                     Email = u.Email,
-                    IdentityId = u.IdentityId,
                     CreateAtUtc = u.CreateAtUtc,
                     UpdateAtUtc = u.UpdateAtUtc,
-                })
-                .FirstOrDefaultAsync();
+                }).FirstOrDefaultAsync();
 
-            return user!;
+            if (user is null)
+            {
+                return null!;
+            }
+
+            return user;
         }
+
     }
 }

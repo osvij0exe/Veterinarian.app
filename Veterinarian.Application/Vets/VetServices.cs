@@ -1,13 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System.Collections.Immutable;
+using System.Threading;
 using Veterinaria.Domain.Entities.Abstracts;
 using Veterinaria.Domain.Entities.Sécialities;
 using Veterinaria.Domain.Entities.Users;
 using Veterinaria.Domain.Entities.Vets;
 using Veterinarian.Application.Common;
 using Veterinarian.Application.UnitsOfWork;
+using Veterinarian.Application.UserServices;
+using Veterinarian.Infrastructure.ServicesFiles;
 using Veterinarian.Security.Token;
 
 namespace Veterinarian.Application.Vets
@@ -27,6 +31,8 @@ namespace Veterinarian.Application.Vets
             using IDbContextTransaction transaction = await _vetsUnitOfWork._applicationIdentityDbContext.Database.BeginTransactionAsync();
             _vetsUnitOfWork._applicationDbContext.Database.SetDbConnection(_vetsUnitOfWork._applicationIdentityDbContext.Database.GetDbConnection());
             await _vetsUnitOfWork._applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
+
+
 
             //Aplication User ApplicationDbContext
             User user = new User
@@ -212,14 +218,16 @@ namespace Veterinarian.Application.Vets
 
         }
 
-        public async Task<Result> UpdateAsync(Guid id, VetRequest resources)
+        public async Task<Result> UpdateAsync(Guid id, VetRequest resources, string userId)
         {
             var vet = await _vetsUnitOfWork.VetsRepository.GetByIdAsync(id);
 
-            if(vet is null)
+            if(vet is null && vet!.UserId != userId)
             {
                 return Result.Failure(VetsError.VetNotFoud);
             }
+
+
 
             var speciality = await _vetsUnitOfWork.SpecialityRepository.GetByIdAsync(resources.SpecialityId);
 
@@ -227,6 +235,7 @@ namespace Veterinarian.Application.Vets
             {
                 return Result.Failure(SpecialityError.SpecialityNotFound);
             }
+
 
             vet.GivenName = resources.GivenName;
             vet.FamilyName = resources.FamilyName;

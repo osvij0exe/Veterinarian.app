@@ -8,6 +8,6 @@ namespace Veterinaria.Domain.Entities.Users
 {
     public interface IUserContext
     {
-        Task<string> GetUserIdAsync(CancellationToken cancellationToken);
+        Task<string?> GetUserIdAsync(CancellationToken cancellationToken);
     }
 }

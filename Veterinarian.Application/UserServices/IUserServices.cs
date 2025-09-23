@@ -9,7 +9,7 @@ namespace Veterinarian.Application.UserServices
 {
     public interface IUserServices
     {
-        Task<Result<UserResponse>> GetUserById(string id,CancellationToken cancellationToken);
+        Task<Result<UserResponse>> GetUserByIdAsync(string id,CancellationToken cancellationToken);
         Task<Result<UserResponse>> GetCurrentUser(CancellationToken cancellationToken);
     }
 }

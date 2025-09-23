@@ -8,7 +8,7 @@ namespace Veterinaria.Domain.Entities.Users
 {
     public interface IUserRepository
     {
-        Task<User> GetUserByIdAsync(string id);
+        Task<User> GetUserByIdAsync(string userId, CancellationToken cancellationToken);
         Task<bool> AddAsync(User user);
 
     }
