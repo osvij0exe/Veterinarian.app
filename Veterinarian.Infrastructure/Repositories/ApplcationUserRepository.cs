@@ -46,6 +46,16 @@ namespace Veterinarian.Infrastructure.Repositories
             return true;
         }
 
+        public async Task DelectUserAsync(IdentityUser identityUser)
+        {
+            await _userManager.DeleteAsync(identityUser);
+        }
+
+        public async Task<IdentityUser> GetUserById(string identityId)
+        {
+            IdentityUser? identitUser = await _userManager.FindByIdAsync(identityId);
+            return identitUser!;
+        }
 
         public async Task<IdentityUser> Login(string email, string passowrd)
         {

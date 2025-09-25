@@ -17,7 +17,6 @@ namespace Veterinarian.Application.Vets
         Task<Result<List<VetResponse>>> GetAllAsync();
         Task<Result> UpdateAsync(Guid id, VetRequest resources, string userId);
         Task<Result<List<VetResponse>>> SearchVetAsync(string? search);
-
         Task<Result<PaginationResultDto<VetResponse>>> SearchVetAsync(string? search, int page = 1, int pageSize = 5);
 
     }

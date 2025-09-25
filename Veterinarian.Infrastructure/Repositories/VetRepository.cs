@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Veterinaria.Domain.Entities.Common;
+using Veterinaria.Domain.Entities.Users;
 using Veterinaria.Domain.Entities.Vets;
 
 using Veterinarian.Infrastructure.Common;

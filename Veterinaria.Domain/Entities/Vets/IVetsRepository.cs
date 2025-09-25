@@ -12,8 +12,9 @@ namespace Veterinaria.Domain.Entities.Vets
     {
         Task<List<Vet>> SearchVet(string? search);
 
-        Task<PaginationResult<Vet>> SearchVet(string? search, int page = 1, int pageSize = 5); 
+        Task<PaginationResult<Vet>> SearchVet(string? search, int page = 1, int pageSize = 5);
 
+        //Task softDeleteAsync(Guid id);
 
     }
     

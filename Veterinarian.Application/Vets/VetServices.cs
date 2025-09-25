@@ -1,18 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using System.Collections.Immutable;
-using System.Threading;
 using Veterinaria.Domain.Entities.Abstracts;
 using Veterinaria.Domain.Entities.Sécialities;
 using Veterinaria.Domain.Entities.Users;
 using Veterinaria.Domain.Entities.Vets;
 using Veterinarian.Application.Common;
 using Veterinarian.Application.UnitsOfWork;
-using Veterinarian.Application.UserServices;
-using Veterinarian.Infrastructure.ServicesFiles;
-using Veterinarian.Security.Token;
+
 
 namespace Veterinarian.Application.Vets
 {
@@ -78,15 +73,32 @@ namespace Veterinarian.Application.Vets
 
         public async Task<Result> DeleteAsync(Guid id)
         {
-            var vet = await _vetsUnitOfWork.VetsRepository.GetByIdAsync(id);
+            //transacción entre tablas dentro de la misma base de datos
+            using IDbContextTransaction transaction = await _vetsUnitOfWork._applicationIdentityDbContext.Database.BeginTransactionAsync();
+            _vetsUnitOfWork._applicationDbContext.Database.SetDbConnection(_vetsUnitOfWork._applicationIdentityDbContext.Database.GetDbConnection());
+            await _vetsUnitOfWork._applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());
 
+            var vet = await _vetsUnitOfWork.VetsRepository.GetByIdAsync(id);
+                      
             if (vet is null)
             {
                 return Result.Failure(VetsError.VetNotFoud);
             }
 
+            var user = await _vetsUnitOfWork.UserRepository.GetUserByIdAsync(vet.UserId);
+
+            IdentityUser identityUser =  await _vetsUnitOfWork.IAplicaionUserRepository.GetUserById(user.IdentityId);
+            
+            if(identityUser is null  || user is null)
+            {
+                return Result.Failure(VetsError.VetNotFoud);
+            }
+
             _vetsUnitOfWork.VetsRepository.Delete(vet);
+            await _vetsUnitOfWork.IAplicaionUserRepository.DelectUserAsync(identityUser);
             await _vetsUnitOfWork.SaveChangesAsync();
+            await _vetsUnitOfWork._applicationIdentityDbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
             return Result.Success();
 
         }

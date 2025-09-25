@@ -17,8 +17,8 @@ namespace Veterinarian.Application.Configurations
             builder.ToTable("Veterinarians");
             builder.HasKey(v => v.Id);
 
-            builder.Property(v => v.UserId)
-                .HasMaxLength(500);
+            //builder.Property(v => v.UserId)
+            //    .HasMaxLength(500);
 
             builder.Property(v => v.GivenName)
                 .HasMaxLength(250)

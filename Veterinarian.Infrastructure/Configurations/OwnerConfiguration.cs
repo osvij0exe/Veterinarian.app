@@ -31,7 +31,6 @@ namespace Veterinarian.Application.Configurations
                 .IsRequired();
             builder.Property(o => o.Email)
                 .IsRequired();
-
             //skip porperty
             builder.HasMany(o => o.Pets)
                 .WithMany()

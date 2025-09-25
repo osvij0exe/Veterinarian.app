@@ -36,7 +36,7 @@ namespace Veterinarian.Application.UserServices
                 return Result.Failure<UserResponse>(new Error(StatusCodes.Status403Forbidden.ToString(),"Access denied"));
             }
 
-            var user = await _userRepository.GetUserByIdAsync(userId, cancellationToken );
+            var user = await _userRepository.GetUserByIdAsync(userId);
 
             if(user is  null)
             {
@@ -64,7 +64,7 @@ namespace Veterinarian.Application.UserServices
                 return Result.Failure<UserResponse>(new Error(StatusCodes.Status401Unauthorized.ToString(), "Unauthorized"));
             }
 
-            var user = await _userRepository.GetUserByIdAsync(userId,cancellationToken);
+            var user = await _userRepository.GetUserByIdAsync(userId);
 
             if (user is null)
             {

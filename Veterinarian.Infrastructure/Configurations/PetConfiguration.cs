@@ -34,7 +34,6 @@ namespace Veterinarian.Application.Configurations
                 .IsRequired();
             builder.Property(p => p.BirhtDate)
                 .IsRequired();
-
             //skip porperty
             builder.HasMany(p => p.Owners)
                 .WithMany()

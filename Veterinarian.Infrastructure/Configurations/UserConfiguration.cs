@@ -27,7 +27,6 @@ namespace Veterinarian.Infrastructure.Configurations
 
             builder.HasIndex(user => user.Email).IsUnique();
             builder.HasIndex(user => user.IdentityId).IsUnique();
-
             //skip property
             builder.HasMany(u => u.MedicalConsultations)
                 .WithMany()

@@ -17,6 +17,9 @@ namespace Veterinaria.Domain.Entities.ApplicationUser
         Task<bool> AddRefreshTokenAsync(Guid Id, string UserId, string Token, DateTime ExpiresAtUtc);
         Task<RefreshToken> RefresTokenProviderAsync(string refreshToken);
         Task<IList<string>> UserRolesAsync(IdentityUser identity);
+        Task<IdentityUser> GetUserById(string identityId);
+        Task DelectUserAsync(IdentityUser identityUser);
+
 
     }
 }

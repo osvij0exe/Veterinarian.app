@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Veterinaria.Domain.Entities.MedicalConsultations;
 using Veterinaria.Domain.Entities.MedicalConsultationUsers;
+using Veterinaria.Domain.Entities.Vets;
 
 namespace Veterinaria.Domain.Entities.Users
 {
@@ -19,8 +21,6 @@ namespace Veterinaria.Domain.Entities.Users
 
         //Id from the identityProvider
         public string IdentityId { get; set; } = default!;
-
-
 
 
         public List<MedicalConsultationUser> MedicalConsutlationUser { get; set; } = default!;

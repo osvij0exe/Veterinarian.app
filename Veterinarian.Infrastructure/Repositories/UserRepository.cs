@@ -28,7 +28,7 @@ namespace Veterinarian.Infrastructure.Repositories
             return true;
         }
 
-        public async Task<User> GetUserByIdAsync(string userId, CancellationToken cancellationToken)
+        public async Task<User> GetUserByIdAsync(string userId)
         {
 
             User? user = await _applicationDbContext.Set<User>()
@@ -40,6 +40,7 @@ namespace Veterinarian.Infrastructure.Repositories
                     Email = u.Email,
                     CreateAtUtc = u.CreateAtUtc,
                     UpdateAtUtc = u.UpdateAtUtc,
+                    IdentityId = u.IdentityId
                 }).FirstOrDefaultAsync();
 
             if (user is null)
